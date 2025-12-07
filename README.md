@@ -151,7 +151,7 @@ python src/train.py --config config.yaml
 ### 3. Evaluate Results
 
 ```bash
-python src/evaluate.py --model_path models/move_best.pth
+python src/eval.py --model_path models/move_best.pth
 ```
 
 **[Describe evaluation metrics and visualizations]**
@@ -191,20 +191,5 @@ Core packages:
 
 ## References
 
-**[Add relevant citations]**
-
-1. MOVE paper: [Add citation if using specific MOVE implementation]
-2. LinkedOmics: [Add dataset citation]
-3. [Other relevant papers]
-
-## License
-
-**[Specify your license]**
-
-## Contact
-
-**[Add your contact information]**
-
-## Acknowledgments
-
-**[Credit data sources, collaborators, funding, etc.]**
+1. MOVE paper: https://www.nature.com/articles/s41587-022-01520-x
+2. LinkedOmics: (https://www.linkedomics.org/data_download/TCGA-LAML/)
