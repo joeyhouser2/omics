@@ -1,0 +1,210 @@
+# Multi-Omics Integration with MOVE Autoencoder
+
+This project applies the MOVE (Multi-Omics Variational autoEncoder) framework to integrate and analyze multi-omics cancer data.
+
+## Overview
+
+**[Add a brief description of your project goals and research questions here]**
+
+## Dataset
+
+The project uses LinkedOmics multi-omics data including:
+
+- **RNA-seq** (`rna_seq.csv`) - Gene expression data
+- **Methylation** (`methylation_gene_level.csv`) - DNA methylation profiles
+- **miRNA** (`gene_level_mirna.cct.csv`, `mirnaisoform.csv`) - microRNA expression
+- **Mutations** (`mutation_gene_level.csv`, `mutation_site_level.csv`) - Somatic mutations
+- **Copy Number Variations** (`SCNV_Genelevel.csv`, `SCNV_focal_level.csv`) - Somatic CNVs
+- **Clinical Data** (`clinical.csv`) - Patient metadata and outcomes
+
+**Data source:** [Specify your data source and any relevant citations]
+
+**[Add details about sample size, cancer type, preprocessing steps, etc.]**
+
+## MOVE Autoencoder
+
+MOVE is a deep learning framework designed to:
+- Integrate multiple omics data modalities
+- Learn shared and modality-specific latent representations
+- Handle missing data across modalities
+- Enable downstream analysis (clustering, classification, survival analysis)
+
+**[Add your specific MOVE architecture details, hyperparameters, etc.]**
+
+## Project Structure
+
+```
+omics/
+├── data/                          # Raw multi-omics CSV files
+├── notebooks/                     # Jupyter notebooks for analysis
+│   └── [exploratory_analysis.ipynb]
+│   └── [move_training.ipynb]
+├── src/                          # Source code
+│   ├── preprocessing.py          # Data preprocessing and normalization
+│   ├── move_model.py             # MOVE autoencoder implementation
+│   ├── train.py                  # Training scripts
+│   └── evaluate.py               # Evaluation and visualization
+├── models/                       # Saved trained models
+├── results/                      # Output figures and results
+├── split_excel.py                # Utility to extract data from Excel
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
+```
+
+**[Create the above folders and scripts as needed]**
+
+## Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+- Git
+
+### Setup Instructions
+
+1. Clone this repository:
+```bash
+git clone [your-repo-url]
+cd omics
+```
+
+2. Create a virtual environment:
+
+**On Windows:**
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+venv\Scripts\activate
+
+# You should see (venv) in your command prompt
+```
+
+**On macOS/Linux:**
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+
+# You should see (venv) in your terminal prompt
+```
+
+3. Upgrade pip (recommended):
+```bash
+python -m pip install --upgrade pip
+```
+
+4. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+5. Verify installation:
+```bash
+python -c "import torch; print(f'PyTorch version: {torch.__version__}')"
+python -c "import pandas; print(f'Pandas version: {pandas.__version__}')"
+```
+
+### Deactivating the Virtual Environment
+
+When you're done working on the project:
+```bash
+deactivate
+```
+
+### Troubleshooting
+
+**Issue: Python not found**
+- Ensure Python 3.8+ is installed: `python --version` or `python3 --version`
+- Download from [python.org](https://www.python.org/downloads/)
+
+**Issue: Activation script not found on Windows**
+- Try: `venv\Scripts\Activate.ps1` (PowerShell) or `venv\Scripts\activate.bat` (CMD)
+
+**Issue: PyTorch installation fails**
+- Visit [PyTorch.org](https://pytorch.org/get-started/locally/) for platform-specific installation commands
+- For CPU-only: `pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu`
+
+## Usage
+
+**[Add step-by-step instructions on how to run your analysis]**
+
+### 1. Data Preprocessing
+
+```bash
+python src/preprocessing.py
+```
+
+**[Describe what preprocessing steps are performed]**
+
+### 2. Train MOVE Model
+
+```bash
+python src/train.py --config config.yaml
+```
+
+**[Describe training parameters and expected output]**
+
+### 3. Evaluate Results
+
+```bash
+python src/evaluate.py --model_path models/move_best.pth
+```
+
+**[Describe evaluation metrics and visualizations]**
+
+### 4. Notebooks
+
+Explore the analysis notebooks:
+- `notebooks/exploratory_analysis.ipynb` - Data exploration and quality control
+- `notebooks/move_training.ipynb` - Interactive model training and tuning
+
+## Results
+
+**[Add your key findings, figures, and performance metrics]**
+
+### Model Performance
+- **[Reconstruction loss:]** [Add values]
+- **[Clustering metrics:]** [Add NMI, ARI, etc.]
+- **[Classification accuracy:]** [If applicable]
+
+### Visualizations
+**[Include key plots: UMAP/t-SNE embeddings, heatmaps, survival curves, etc.]**
+
+## Key Findings
+
+**[Summarize biological insights and discoveries]**
+
+## Requirements
+
+See `requirements.txt` for full list of dependencies.
+
+Core packages:
+- Python 3.8+
+- PyTorch 2.0+
+- pandas, numpy
+- scikit-learn
+- matplotlib, seaborn
+
+## References
+
+**[Add relevant citations]**
+
+1. MOVE paper: [Add citation if using specific MOVE implementation]
+2. LinkedOmics: [Add dataset citation]
+3. [Other relevant papers]
+
+## License
+
+**[Specify your license]**
+
+## Contact
+
+**[Add your contact information]**
+
+## Acknowledgments
+
+**[Credit data sources, collaborators, funding, etc.]**
