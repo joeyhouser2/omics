@@ -1,3 +1,6 @@
+# MOVE - Multi-Omics Variational autoEncoder (official package)
+move-dl>=1.0.0
+
 # Core deep learning framework
 torch>=2.0.0
 torchvision>=0.15.0

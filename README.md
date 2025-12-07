@@ -131,23 +131,59 @@ deactivate
 
 ## Usage
 
-**we will need to fill this out**
-
 ### 1. Data Preprocessing
+
+Preprocess your multi-omics data and extract perturbations:
 
 ```bash
 python src/preprocessing.py
 ```
 
-**[Describe what preprocessing steps are performed]**
+This script:
+- Loads clinical and mutation data to extract perturbations (FLT3, NPM1, Gender)
+- Loads RNA-seq, methylation, and CNV data
+- Filters and selects top variable features
+- Normalizes data with z-score standardization
+- Aligns samples across all modalities
+- Saves processed data to `processed_data/`
+
+**Output:**
+- `rna_seq_processed.csv` - Top 5000 variable genes
+- `methylation_processed.csv` - Top 5000 variable CpG sites
+- `cnv_processed.csv` - Top 3000 variable genes
+- `perturbations.csv` - Binary perturbation variables (FLT3, NPM1, Gender)
+- `summary_stats.csv` - Dataset statistics
 
 ### 2. Train MOVE Model
 
+Train the MOVE autoencoder with perturbations:
+
 ```bash
-python src/train.py --config config.yaml
+python src/train.py
 ```
 
-**[Describe training parameters and expected output]**
+This uses the official **MOVE (Multi-Omics Variational autoEncoder)** package from [RasmussenLab/MOVE](https://github.com/RasmussenLab/MOVE).
+
+**Training Configuration:**
+- Latent dimension: 128
+- Encoder layers: [512, 256]
+- Decoder layers: [256, 512]
+- Batch size: 32
+- Learning rate: 1e-3
+- Epochs: 100
+
+**What it does:**
+1. Loads preprocessed multi-omics data
+2. Encodes each modality (RNA, methylation, CNV) separately
+3. Integrates with perturbations (FLT3, NPM1, Gender)
+4. Creates shared latent representation
+5. Reconstructs each modality
+6. Saves trained model and latent embeddings
+
+**Resources:**
+- Documentation: https://move-dl.readthedocs.io/
+- Tutorial: [Google Colab Notebook](https://colab.research.google.com/drive/1RFWNsuGymCmppPsElBvDuA9zRbGskKmi)
+- Paper: [Nature Biotechnology (2023)](https://www.nature.com/articles/s41587-023-01705-7)
 
 ### 3. Evaluate Results
 
