@@ -1,16 +1,3 @@
-"""
-Training script for MOVE (Multi-Omics Variational autoEncoder) with perturbations.
-
-This script:
-1. Loads preprocessed multi-omics data
-2. Configures MOVE model
-3. Trains the model with FLT3, NPM1, and Gender perturbations
-4. Saves trained model and embeddings
-
-Based on: https://github.com/RasmussenLab/MOVE
-Documentation: https://move-dl.readthedocs.io/
-"""
-
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -19,7 +6,7 @@ from typing import Dict
 import warnings
 warnings.filterwarnings('ignore')
 
-# Try to import MOVE - will provide helpful error if not installed
+#MOVE import
 try:
     from move import MOVE, train_move_model
     MOVE_AVAILABLE = True
@@ -28,69 +15,47 @@ except ImportError:
     print("WARNING: move-dl package not found!")
     print("Install with: pip install move-dl")
     print("Continuing with basic setup...")
-
-# Paths
 PROCESSED_DATA_DIR = Path('processed_data')
 MODELS_DIR = Path('models')
 RESULTS_DIR = Path('results')
-
 MODELS_DIR.mkdir(exist_ok=True)
 RESULTS_DIR.mkdir(exist_ok=True)
-
-# Training configuration
 CONFIG = {
-    'latent_dim': 128,              # Dimension of shared latent space
-    'batch_size': 32,               # Batch size for training
-    'learning_rate': 1e-3,          # Learning rate
-    'num_epochs': 100,              # Number of training epochs
-    'beta': 1.0,                    # Beta parameter for beta-VAE (KL weight)
-    'encoder_layers': [512, 256],   # Hidden layers for encoders
-    'decoder_layers': [256, 512],   # Hidden layers for decoders
+    'latent_dim': 128,              
+    'batch_size': 32,               
+    'learning_rate': 1e-3,          
+    'num_epochs': 100,             
+    'beta': 1.0,                    
+    'encoder_layers': [512, 256],   
+    'decoder_layers': [256, 512],   
     'use_gpu': torch.cuda.is_available(),
-    'save_every': 10,               # Save checkpoint every N epochs
+    'save_every': 10,               #save checkpoint
 }
 
 
 class MOVEDataLoader:
-    """Load and prepare data for MOVE training."""
-
     def __init__(self, data_dir: Path = PROCESSED_DATA_DIR):
         self.data_dir = data_dir
 
     def load_processed_data(self) -> Dict:
-        """
-        Load all preprocessed multi-omics data and perturbations.
-
-        Returns:
-            Dictionary containing all datasets
-        """
         print("Loading processed data...")
-
-        # Load omics data
         rna = pd.read_csv(self.data_dir / 'rna_seq_processed.csv', index_col=0)
         meth = pd.read_csv(self.data_dir / 'methylation_processed.csv', index_col=0)
         cnv = pd.read_csv(self.data_dir / 'cnv_processed.csv', index_col=0)
-
-        # Load perturbations
         perturbations = pd.read_csv(self.data_dir / 'perturbations.csv', index_col=0)
 
         print(f"  RNA-seq: {rna.shape}")
         print(f"  Methylation: {meth.shape}")
         print(f"  CNV: {cnv.shape}")
         print(f"  Perturbations: {perturbations.shape}")
-
-        # Verify sample alignment
         assert all(rna.index == meth.index == cnv.index == perturbations.index), \
             "Sample IDs must match across all datasets!"
-
         data = {
             'rna': rna,
             'methylation': meth,
             'cnv': cnv,
             'perturbations': perturbations,
-            'sample_ids': rna.index.tolist()
-        }
-
+            'sample_ids': rna.index.tolist()}
         return data
 
     def create_move_format(self, data: Dict) -> Dict:
