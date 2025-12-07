@@ -6,6 +6,7 @@ This project applies the MOVE (Multi-Omics Variational autoEncoder) framework to
 
 **We will be flipping mutations to 0 or 1 as our Perturbations with MOVE. We can do this with certain clinical data as well - male or female**
 **FLT3_Mutated can be 0 or 1, NPM1_Mutated can be 0 or 1, Gender_Male can be 0 or 1**
+**We can theoretically measure which pathways would return to normal if a mutation was no longer present**
 
 ## Dataset
 
