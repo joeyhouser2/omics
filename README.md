@@ -4,7 +4,8 @@ This project applies the MOVE (Multi-Omics Variational autoEncoder) framework to
 
 ## Overview
 
-**[Add a brief description of your project goals and research questions here]**
+**We will be flipping mutations to 0 or 1 as our Perturbations with MOVE. We can do this with certain clinical data as well - male or female**
+**FLT3_Mutated can be 0 or 1, NPM1_Mutated can be 0 or 1, Gender_Male can be 0 or 1**
 
 ## Dataset
 
@@ -64,8 +65,7 @@ omics/
 
 1. Clone this repository:
 ```bash
-git clone [your-repo-url]
-cd omics
+git clone https://github.com/joeyhouser2/omics.git
 ```
 
 2. Create a virtual environment:
@@ -130,7 +130,7 @@ deactivate
 
 ## Usage
 
-**[Add step-by-step instructions on how to run your analysis]**
+**we will need to fill this out**
 
 ### 1. Data Preprocessing
 
