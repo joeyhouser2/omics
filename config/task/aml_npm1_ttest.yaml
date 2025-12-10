@@ -1,0 +1,19 @@
+defaults:
+  - identify_associations_ttest
+
+batch_size: 32
+
+num_refits: 10
+
+target_dataset: npm1_status
+target_value: Mutated
+save_refits: True
+
+model:
+  num_hidden:
+    - 512
+    - 256
+
+training_loop:
+  lr: 1e-4
+  num_epochs: 100

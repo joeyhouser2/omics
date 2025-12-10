@@ -37,23 +37,28 @@ MOVE is a deep learning framework designed to:
 
 ```
 omics/
-├── data/                          # Raw multi-omics CSV files
+├── data/                          # Raw multi-omics CSV files (input)
+├── config/                        # MOVE configuration files
+│   ├── data/
+│   │   └── aml_omics.yaml         # Data paths and input file definitions
+│   └── task/
+│       ├── aml_latent_analysis.yaml
+│       ├── aml_flt3_ttest.yaml
+│       ├── aml_flt3_bayes.yaml
+│       ├── aml_npm1_ttest.yaml
+│       └── aml_npm1_bayes.yaml
+├── move_data/                     # MOVE input/output directories
+│   ├── raw/                       # Preprocessed TSV files for MOVE
+│   ├── interim/                   # MOVE intermediate files
+│   └── results/                   # MOVE output (plots, associations)
+├── src/
+│   ├── preprocessing.py           # Data preprocessing pipeline
+│   ├── move.py                    # MOVE command runner
+│   └── train.py                   # Training scripts
 ├── notebooks/                     # Jupyter notebooks for analysis
-│   └── [exploratory_analysis.ipynb]
-│   └── [move_training.ipynb]
-├── src/                          # Source code
-│   ├── preprocessing.py          # Data preprocessing and normalization
-│   ├── move_model.py             # MOVE autoencoder implementation
-│   ├── train.py                  # Training scripts
-│   └── evaluate.py               # Evaluation and visualization
-├── models/                       # Saved trained models
-├── results/                      # Output figures and results
-├── split_excel.py                # Utility to extract data from Excel
-├── requirements.txt              # Python dependencies
-└── README.md                     # This file
+├── requirements.txt               # Python dependencies
+└── README.md                      # This file
 ```
-
-**[Create the above folders and scripts as needed]**
 
 ## Installation
 
@@ -101,6 +106,7 @@ python -m pip install --upgrade pip
 4. Install dependencies:
 ```bash
 pip install -r requirements.txt
+pip install move-dl
 ```
 
 5. Verify installation:
@@ -145,59 +151,78 @@ This script:
 - Filters and selects top variable features
 - Normalizes data with z-score standardization
 - Aligns samples across all modalities
-- Saves processed data to `processed_data/`
+- Verifies all sample IDs match across datasets
+- Saves MOVE-compatible files to `move_data/raw/`
 
-**Output:**
-- `rna_seq_processed.csv` - Top 5000 variable genes
-- `methylation_processed.csv` - Top 5000 variable CpG sites
-- `cnv_processed.csv` - Top 3000 variable genes
-- `perturbations.csv` - Binary perturbation variables (FLT3, NPM1, Gender)
-- `summary_stats.csv` - Dataset statistics
+**Output (in `move_data/raw/`):**
 
-### 2. Train MOVE Model
+Continuous data (TSV with sample_id as first column):
+- `rna_seq.tsv` - Top 5000 variable genes
+- `methylation.tsv` - Top 5000 variable CpG sites
+- `cnv.tsv` - Top 3000 variable genes
 
-Train the MOVE autoencoder with perturbations:
+Categorical data (TSV with sample_id and category columns):
+- `flt3_status.tsv` - FLT3 mutation status (Wild_Type/Mutated)
+- `npm1_status.tsv` - NPM1 mutation status (Wild_Type/Mutated)
+- `gender.tsv` - Gender (Female/Male)
+
+Sample IDs:
+- `sample_ids.txt` - List of valid sample IDs (one per line)
+
+### 2. Run MOVE Analyses
+
+Use the MOVE command runner:
 
 ```bash
-python src/train.py
+python src/move.py <task>
 ```
 
-This uses the official **MOVE (Multi-Omics Variational autoEncoder)** package from [RasmussenLab/MOVE](https://github.com/RasmussenLab/MOVE).
+**Available tasks:**
 
-**Training Configuration:**
-- Latent dimension: 128
-- Encoder layers: [512, 256]
-- Decoder layers: [256, 512]
-- Batch size: 32
-- Learning rate: 1e-3
-- Epochs: 100
+| Command | Description |
+|---------|-------------|
+| `python src/move.py latent` | Latent space analysis - train VAE and visualize |
+| `python src/move.py flt3` | FLT3 association analysis (t-test) |
+| `python src/move.py flt3_bayes` | FLT3 association analysis (Bayesian) |
+| `python src/move.py npm1` | NPM1 association analysis (t-test) |
+| `python src/move.py npm1_bayes` | NPM1 association analysis (Bayesian) |
+| `python src/move.py all` | Run all t-test analyses |
 
-**What it does:**
-1. Loads preprocessed multi-omics data
-2. Encodes each modality (RNA, methylation, CNV) separately
-3. Integrates with perturbations (FLT3, NPM1, Gender)
-4. Creates shared latent representation
-5. Reconstructs each modality
-6. Saves trained model and latent embeddings
+**Or run MOVE directly:**
 
-**Resources:**
-- Documentation: https://move-dl.readthedocs.io/
+```bash
+move-dl data=aml_omics task=aml_latent_analysis
+move-dl data=aml_omics task=aml_flt3_ttest
+move-dl data=aml_omics task=aml_npm1_bayes
+```
+
+**Override parameters from command line:**
+
+```bash
+python src/move.py latent training_loop.num_epochs=200
+python src/move.py flt3 batch_size=64 training_loop.lr=1e-3
+```
+
+### 3. Output Files
+
+**Latent space analysis** (`move_data/results/latent_space/`):
+- `loss_curve.png` - Training loss over epochs (overall, KLD, BCE, SSE)
+- `reconstruction_metrics.png` - Accuracy/cosine similarity per dataset
+- `latent_space_tsne.png` - 2D visualization of latent space
+- `feature_importance.png` - Impact of each feature on latent space
+- Corresponding TSV files for each plot
+
+**Association analysis** (`move_data/results/`):
+- `results_sig_assoc.tsv` - Associated feature pairs with median p-values
+
+**Note:** Association analyses take ~45 min on a standard laptop. Check `logs/` folder for progress.
+
+### 4. Resources
+
+- MOVE Documentation: https://move-dl.readthedocs.io/
 - Tutorial: [Google Colab Notebook](https://colab.research.google.com/drive/1RFWNsuGymCmppPsElBvDuA9zRbGskKmi)
 - Paper: [Nature Biotechnology (2023)](https://www.nature.com/articles/s41587-023-01705-7)
-
-### 3. Evaluate Results
-
-```bash
-python src/eval.py --model_path models/move_best.pth
-```
-
-**[Describe evaluation metrics and visualizations]**
-
-### 4. Notebooks
-
-Explore the analysis notebooks:
-- `notebooks/exploratory_analysis.ipynb` - Data exploration and quality control
-- `notebooks/move_training.ipynb` - Interactive model training and tuning
+- GitHub: https://github.com/RasmussenLab/MOVE
 
 ## Results
 
@@ -222,6 +247,7 @@ See `requirements.txt` for full list of dependencies.
 Core packages:
 - Python 3.8+
 - PyTorch 2.0+
+- move-dl
 - pandas, numpy
 - scikit-learn
 - matplotlib, seaborn

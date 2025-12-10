@@ -1,0 +1,9 @@
+,0
+n_samples,163
+n_rna_features,5000
+n_meth_features,5000
+n_cnv_features,3000
+n_perturbations,3
+flt3_positive,42
+npm1_positive,26
+male_count,86

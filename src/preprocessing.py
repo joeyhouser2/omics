@@ -7,8 +7,12 @@ from typing import Tuple
 import warnings
 warnings.filterwarnings('ignore')
 DATA_DIR = Path('data')
-OUTPUT_DIR = Path('processed_data')
-OUTPUT_DIR.mkdir(exist_ok=True)
+RAW_DATA_DIR = Path('move_data/raw')  # All MOVE input files go here
+INTERIM_DIR = Path('move_data/interim')
+RESULTS_DIR = Path('move_data/results')
+RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+INTERIM_DIR.mkdir(parents=True, exist_ok=True)
+RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Processing parameters
 TOP_GENES_RNA = 5000        # Top variable genes for RNA-seq
@@ -152,24 +156,56 @@ class MultiOmicsPreprocessor:
         return tuple(normalized)
 
     def save_processed_data(self, rna: pd.DataFrame, meth: pd.DataFrame, cnv: pd.DataFrame, perturbations: pd.DataFrame):
-        print("\nSaving processed data...")
+        print("\nSaving processed data to raw_data directory...")
 
-        rna.to_csv(OUTPUT_DIR / 'rna_seq_processed.csv')
-        print(f"  Saved RNA-seq: {rna.shape}")
+        # Verify all datasets have the same samples
+        assert list(rna.index) == list(meth.index) == list(cnv.index) == list(perturbations.index), \
+            "Sample IDs must match across all datasets!"
 
-        meth.to_csv(OUTPUT_DIR / 'methylation_processed.csv')
-        print(f"  Saved methylation: {meth.shape}")
-
-        cnv.to_csv(OUTPUT_DIR / 'cnv_processed.csv')
-        print(f"  Saved CNV: {cnv.shape}")
-
-        perturbations.to_csv(OUTPUT_DIR / 'perturbations.csv')
-        print(f"  Saved perturbations: {perturbations.shape}")
-        with open(OUTPUT_DIR / 'sample_ids.txt', 'w') as f:
+        # Save sample IDs file first (one ID per line, no header)
+        # These IDs must appear in every dataset
+        with open(RAW_DATA_DIR / 'sample_ids.txt', 'w') as f:
             f.write('\n'.join(rna.index))
-        print(f"  Saved sample IDs: {len(rna.index)} samples")
+        print(f"  Saved sample_ids.txt: {len(rna.index)} samples")
 
-        # save metadata
+        # Save continuous data as TSV with sample IDs as first column
+        rna.to_csv(RAW_DATA_DIR / 'rna_seq.tsv', sep='\t', index_label='sample_id')
+        print(f"  Saved rna_seq.tsv: {rna.shape}")
+
+        meth.to_csv(RAW_DATA_DIR / 'methylation.tsv', sep='\t', index_label='sample_id')
+        print(f"  Saved methylation.tsv: {meth.shape}")
+
+        cnv.to_csv(RAW_DATA_DIR / 'cnv.tsv', sep='\t', index_label='sample_id')
+        print(f"  Saved cnv.tsv: {cnv.shape}")
+
+        # Save each categorical/binary variable as a separate TSV file
+        # Format: sample_id \t category_value (two columns only)
+        for col in perturbations.columns:
+            # Convert binary 0/1 to descriptive categories
+            if col == 'FLT3_Mutated':
+                cat_series = perturbations[col].map({0: 'Wild_Type', 1: 'Mutated'})
+                col_name = 'FLT3_Status'
+            elif col == 'NPM1_Mutated':
+                cat_series = perturbations[col].map({0: 'Wild_Type', 1: 'Mutated'})
+                col_name = 'NPM1_Status'
+            elif col == 'Gender_Male':
+                cat_series = perturbations[col].map({0: 'Female', 1: 'Male'})
+                col_name = 'Gender'
+            else:
+                cat_series = perturbations[col]
+                col_name = col
+
+            # Create DataFrame with sample_id and category
+            cat_df = pd.DataFrame({
+                'sample_id': perturbations.index,
+                col_name: cat_series.values
+            })
+
+            # Save as TSV
+            cat_df.to_csv(RAW_DATA_DIR / f'{col_name.lower()}.tsv', sep='\t', index=False)
+            print(f"  Saved {col_name.lower()}.tsv: {len(cat_df)} samples")
+
+        # Save summary metadata
         summary = {
             'n_samples': len(rna),
             'n_rna_features': rna.shape[1],
@@ -181,7 +217,7 @@ class MultiOmicsPreprocessor:
             'male_count': int(perturbations['Gender_Male'].sum())
         }
 
-        pd.Series(summary).to_csv(OUTPUT_DIR / 'summary_stats.csv')
+        pd.Series(summary).to_csv(RAW_DATA_DIR / 'summary_stats.csv')
         print("\n=== Summary Statistics ===")
         for key, value in summary.items():
             print(f"  {key}: {value}")
@@ -215,7 +251,7 @@ def main():
     preprocessor = MultiOmicsPreprocessor()
     rna, meth, cnv, perturbations = preprocessor.run_full_pipeline() # may need to utilize
 
-    print("\nProcessed data saved to:", OUTPUT_DIR.absolute())
+    print("\nProcessed data saved to:", RAW_DATA_DIR.absolute())
     print("\nYou can now use this data to train the MOVE model!")
 
 

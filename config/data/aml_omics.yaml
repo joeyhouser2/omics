@@ -1,0 +1,18 @@
+defaults:
+  - base_data
+
+raw_data_path: move_data/raw/
+interim_data_path: move_data/interim/
+results_path: move_data/results/
+
+sample_names: sample_ids
+
+categorical_inputs:
+  - name: flt3_status
+  - name: npm1_status
+  - name: gender
+
+continuous_inputs:
+  - name: rna_seq
+  - name: methylation
+  - name: cnv
