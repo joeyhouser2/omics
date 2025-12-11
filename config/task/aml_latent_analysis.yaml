@@ -7,10 +7,8 @@ model:
   num_hidden:
     - 512
     - 256
-  latent_dim: 128
+  num_latent: 128
 
 training_loop:
   lr: 1e-4
   num_epochs: 100
-
-save_embeddings: True

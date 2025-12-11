@@ -1,0 +1,14 @@
+{
+    "flt3_status": {
+        "Mutated": 0,
+        "Wild_Type": 1
+    },
+    "npm1_status": {
+        "Mutated": 0,
+        "Wild_Type": 1
+    },
+    "gender": {
+        "Female": 0,
+        "Male": 1
+    }
+}
