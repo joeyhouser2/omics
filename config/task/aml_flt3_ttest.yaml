@@ -15,6 +15,7 @@ num_latent:
 target_dataset: flt3_status
 target_value: Mutated
 save_refits: True
+sig_threshold: 0.1  # Relaxed from default 0.05
 
 model:
   num_hidden:

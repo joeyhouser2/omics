@@ -123,7 +123,8 @@ def main():
         )
 
     # Train
-    print("\nStarting training...")
+    print(f"\nUsing device: {trainer.device}")
+    print("Starting training...")
     history = trainer.train(
         train_loader,
         val_loader,

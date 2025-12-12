@@ -7,7 +7,7 @@ import numpy as np
 from typing import Dict, Optional, Tuple
 import json
 
-from .model import MultiOmicsVAE, VAELoss, MultiOmicsAE, ConditionalVAE
+from model import MultiOmicsVAE, VAELoss, MultiOmicsAE, ConditionalVAE
 
 
 class VAETrainer:
@@ -25,7 +25,7 @@ class VAETrainer:
         self.model = model.to(self.device)
         self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, mode='min', factor=0.5, patience=10, verbose=True
+            self.optimizer, mode='min', factor=0.5, patience=10
         )
         self.criterion = VAELoss(beta=beta)
         self.checkpoint_dir = checkpoint_dir or Path('checkpoints')
@@ -218,7 +218,7 @@ class AETrainer:
         self.model = model.to(self.device)
         self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, mode='min', factor=0.5, patience=10, verbose=True
+            self.optimizer, mode='min', factor=0.5, patience=10
         )
         self.criterion = nn.MSELoss()
         self.checkpoint_dir = checkpoint_dir or Path('checkpoints')
@@ -312,7 +312,7 @@ class CVAETrainer:
         self.model = model.to(self.device)
         self.optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
         self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer, mode='min', factor=0.5, patience=10, verbose=True
+            self.optimizer, mode='min', factor=0.5, patience=10
         )
         self.criterion = VAELoss(beta=beta)
         self.checkpoint_dir = checkpoint_dir or Path('checkpoints')
