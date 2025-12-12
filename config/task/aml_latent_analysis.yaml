@@ -7,7 +7,7 @@ model:
   num_hidden:
     - 512
     - 256
-  num_latent: 128
+  num_latent: 50  # Reduced from 128 (should be < num_samples=163)
 
 training_loop:
   lr: 1e-4

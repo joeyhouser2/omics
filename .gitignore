@@ -91,6 +91,8 @@ Thumbs.db
 *.tmp
 
 # PyTorch specific
+*.pt
+*.pth
 *.pth.tar
 checkpoint/
 
