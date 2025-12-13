@@ -4,10 +4,74 @@ from pathlib import Path
 import torch
 import numpy as np
 import pandas as pd
+import json
 
 from dataset import MultiOmicsDataset, create_data_loaders
 from model import MultiOmicsVAE, MultiOmicsAE, ConditionalVAE
 from trainer import VAETrainer, AETrainer, CVAETrainer
+
+
+def get_feature_names(dataset: MultiOmicsDataset) -> dict:
+    """Extract feature names from the dataset for each modality."""
+    data_dir = dataset.data_dir
+    feature_names = {}
+
+    for omics_type in sorted(dataset.omics_types):  # sorted to match concatenation order
+        file_path = data_dir / f'{omics_type}.tsv'
+        if file_path.exists():
+            df = pd.read_csv(file_path, sep='\t', index_col=0, nrows=0)
+            feature_names[omics_type] = list(df.columns)
+
+    return feature_names
+
+
+def save_reconstructions(
+    trainer,
+    full_loader,
+    dataset: MultiOmicsDataset,
+    output_dir: Path,
+    model_type: str
+):
+    """Extract and save reconstructions for all samples."""
+    print("\nExtracting reconstructions for quality analysis...")
+    model = trainer.model
+    model.eval()
+
+    all_x = []
+    all_recon = []
+
+    with torch.no_grad():
+        for batch in full_loader:
+            if model_type == 'cvae':
+                x, c = trainer._prepare_batch(batch)
+                recon_x, mu, logvar, z = model(x, c)
+            elif model_type == 'vae':
+                x = trainer._prepare_batch(batch)
+                recon_x, mu, logvar, z = model(x)
+            else:  # ae
+                x = trainer._prepare_batch(batch)
+                recon_x, z = model(x)
+
+            all_x.append(x.cpu().numpy())
+            all_recon.append(recon_x.cpu().numpy())
+
+    original = np.concatenate(all_x, axis=0)
+    reconstructed = np.concatenate(all_recon, axis=0)
+
+    # Save as numpy arrays (efficient for large matrices)
+    np.save(output_dir / 'original_data.npy', original)
+    np.save(output_dir / 'reconstructions.npy', reconstructed)
+
+    # Save feature names for reference
+    feature_names = get_feature_names(dataset)
+    with open(output_dir / 'feature_names.json', 'w') as f:
+        json.dump(feature_names, f, indent=2)
+
+    print(f"  Saved original data: {original.shape}")
+    print(f"  Saved reconstructions: {reconstructed.shape}")
+    print(f"  Saved feature names: {sum(len(v) for v in feature_names.values())} features")
+
+    return original, reconstructed, feature_names
 
 
 def main():
@@ -182,6 +246,9 @@ def main():
 
     latent_df.to_csv(output_dir / 'latent_representations.csv')
     print(f"Saved latent representations: {latent_df.shape}")
+
+    # Save reconstructions for quality analysis
+    save_reconstructions(trainer, full_loader, dataset, output_dir, args.model_type)
 
     # Save perturbations alongside for analysis
     if dataset.perturbations is not None:
