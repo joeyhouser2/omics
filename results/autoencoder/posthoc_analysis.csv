@@ -1,4 +1,4 @@
 perturbation,n_positive,n_negative,centroid_distance,significant_dimensions,total_dimensions
-FLT3_Status,42,121,1.2924178419929315,28,64
-NPM1_Status,26,137,1.5052855670088516,28,64
-Gender,86,77,0.8001905016839874,18,64
+FLT3_Status,42,121,0.9660023118443588,15,64
+NPM1_Status,26,137,1.0613715114230065,14,64
+Gender,86,77,0.6515180209095074,9,64
